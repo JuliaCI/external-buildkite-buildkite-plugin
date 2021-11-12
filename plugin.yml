@@ -1,0 +1,13 @@
+name: External
+description: Download Buildkite configuration files from an external repository
+author: https://github.com/JuliaCI
+requirements: [git]
+configuration:
+  properties:
+    version_file:
+      type: string
+    external_repo:
+      type: string
+    folder:
+      type: string
+  additionalProperties: false
