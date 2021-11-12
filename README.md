@@ -1,5 +1,10 @@
 # External Buildkite Plugin
 
+[![Continuous Integration (CI)][ci-img]][ci-url]
+
+[ci-img]: https://github.com/JuliaCI/external-buildkite-plugin/actions/workflows/ci.yml/badge.svg "Continuous Integration (CI)"
+[ci-url]: https://github.com/JuliaCI/external-buildkite-plugin/actions/workflows/ci.yml
+
 Download Buildkite configuration files from an external repository
 
 ## Example
