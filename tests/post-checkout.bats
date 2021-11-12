@@ -15,7 +15,7 @@ load "${BATS_PATH:?}/load.bash"
     run bash -c "rm -rf ${BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE:?}"
     run bash -c "echo d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8 > ${BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE:?}"
 
-    run "$PWD/hooks/post-checkout"
+    run "${PWD:?}/hooks/post-checkout"
 
     assert_success
 
