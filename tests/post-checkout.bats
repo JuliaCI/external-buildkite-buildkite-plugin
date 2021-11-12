@@ -32,4 +32,5 @@ load "${BATS_PATH:?}/load.bash"
     # assert_failure
 
     rm -rf ${TEMPORARY_DIRECTORY:?}
+    unset TEMPORARY_DIRECTORY
 }
