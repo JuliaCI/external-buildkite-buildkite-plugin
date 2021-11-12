@@ -30,7 +30,7 @@ load "${BATS_PATH:?}/load.bash"
     assert_output --partial "Date:   Thu Nov 11 18:48:11 2021 -0500"
 
     # Uncomment the following line to print the output from the hook (useful for debugging):
-    # assert_failure
+    assert_failure
 
     rm -rf ${TEMPORARY_DIRECTORY:?}
 }
