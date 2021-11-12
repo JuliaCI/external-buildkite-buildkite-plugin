@@ -1,0 +1,13 @@
+version: '3'
+services:
+  lint:
+    image: buildkite/plugin-linter:latest
+    command: ['--id', 'JuliaCI/external']
+    volumes:
+      - ".:/plugin:ro"
+  test:
+    build:
+      context: tests
+      dockerfile: Dockerfile
+    volumes:
+      - ".:/plugin:ro"
