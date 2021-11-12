@@ -23,7 +23,7 @@ load "${BATS_PATH:?}/load.bash"
     assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_FOLDER}/README.md
     assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_FOLDER}/stdlib/Pkg.version
 
-    assert_output --partial "The Buildkite configuration version is: d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
+    assert_output --partial "The Buildkite config version is: d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
     assert_output --partial "commit d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
     assert_output --partial "Author: Viral B. Shah <ViralBShah@users.noreply.github.com>"
     assert_output --partial "Date:   Thu Nov 11 18:48:11 2021 -0500"
