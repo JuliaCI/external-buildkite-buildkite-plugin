@@ -2,11 +2,11 @@
 
 set -Eeuo pipefail
 
-echo "--- Print the \`external\` plugin inputs:"
+echo "--- Print the \`external-buildkite\` plugin inputs:"
 
-BK_VERSION_FILE="${BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE:?}"
-BK_EXTERNAL_REPO="${BUILDKITE_PLUGIN_EXTERNAL_EXTERNAL_REPO:?}"
-BK_FOLDER_NAME="${BUILDKITE_PLUGIN_EXTERNAL_FOLDER:?}"
+BK_VERSION_FILE="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}"
+BK_EXTERNAL_REPO="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO:?}"
+BK_FOLDER_NAME="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER:?}"
 
 echo "The Buildkite config version is located in the following file: ${BK_VERSION_FILE:?}"
 echo "The Buildkite config files will be downloaded from the following repository: ${BK_EXTERNAL_REPO:?}"

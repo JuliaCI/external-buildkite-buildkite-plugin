@@ -8,20 +8,20 @@ load "${BATS_PATH:?}/load.bash"
 @test "Integration test" {
     TEMPORARY_DIRECTORY=$(mktemp -d)
 
-    export BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE="${TEMPORARY_DIRECTORY:?}/buildkite.version"
-    export BUILDKITE_PLUGIN_EXTERNAL_EXTERNAL_REPO="https://github.com/JuliaLang/julia.git"
-    export BUILDKITE_PLUGIN_EXTERNAL_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE="${TEMPORARY_DIRECTORY:?}/buildkite.version"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO="https://github.com/JuliaLang/julia.git"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
 
-    run bash -c "rm -rf ${BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE:?}"
-    run bash -c "echo d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8 > ${BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE:?}"
+    run bash -c "rm -rf ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}"
+    run bash -c "echo d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8 > ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}"
 
     run "${PWD:?}/hooks/post-checkout"
 
     assert_success
 
-    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_VERSION_FILE:?}
-    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_FOLDER}/README.md
-    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_FOLDER}/stdlib/Pkg.version
+    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}
+    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER}/README.md
+    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER}/stdlib/Pkg.version
 
     assert_output --partial "The Buildkite config version is: d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
     assert_output --partial "commit d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"

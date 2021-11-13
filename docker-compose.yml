@@ -2,7 +2,7 @@ version: '3'
 services:
   lint:
     image: buildkite/plugin-linter:latest
-    command: ['--id', 'JuliaCI/external']
+    command: ['--id', 'JuliaCI/external-buildkite']
     volumes:
       - ".:/plugin:ro"
   test:
