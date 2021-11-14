@@ -2,51 +2,112 @@
 
 set -Eeuo pipefail
 
-echo "--- Print the \`external-buildkite\` plugin inputs:"
+### Begin helper functions
 
-BK_VERSION_FILE="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}"
-BK_EXTERNAL_REPO="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO:?}"
-BK_FOLDER_NAME="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER:?}"
+function validate_version_file() {
+    local VERSION_FILE_NLINES=$(wc -l ${INPUT_VERSION_FILE:?} | awk '{ print $1 }')
+    local VERSION_FILE_NWORDS=$(wc -w ${INPUT_VERSION_FILE:?} | awk '{ print $1 }')
+    if [ "${VERSION_FILE_NLINES:?}" != "1" ]; then
+        echo "ERROR: The ${INPUT_VERSION_FILE:?} file contains ${VERSION_FILE_NLINES:?} lines."
+        echo "ERROR: It is only supposed to contain 1 line."
+        cat ${INPUT_VERSION_FILE:?}
+        exit 1
+    fi
+    if [ "${VERSION_FILE_NWORDS:?}" != "1" ]; then
+        echo "ERROR: The ${INPUT_VERSION_FILE:?} file contains ${VERSION_FILE_NWORDS:?} words."
+        echo "ERROR: It is only supposed to contain 1 word."
+        cat ${INPUT_VERSION_FILE:?}
+        exit 1
+    fi
+}
 
-echo "The Buildkite config version is located in the following file: ${BK_VERSION_FILE:?}"
-echo "The Buildkite config files will be downloaded from the following repository: ${BK_EXTERNAL_REPO:?}"
-echo "The Buildkite config files will be downloaded into the following folder: ${BK_FOLDER_NAME:?}"
+function get_unresolved_version_first_job() {
+    # In the first job, exactly one of `version` and `version_file` must be provided.
+    if [[ ! -z "${INPUT_VERSION?}" ]]; then # `version` was provided
+        if [[ ! -z "${INPUT_VERSION_FILE?}" ]]; then # `version_file` was provided
+            echo "ERROR: You cannot provide both \`version\` and \`version_file\`"
+            exit 1
+        else # `version_file` was not provided
+            UNRESOLVED_VERSION="${INPUT_VERSION:?}"
+        fi
+    else # `version` was not provided
+        if [[ ! -z "${INPUT_VERSION_FILE?}" ]]; then # `version_file` was provided
+            echo "INFO: The Buildkite config version is located in the following file: ${INPUT_VERSION_FILE:?}"
+            validate_version_file
+            UNRESOLVED_VERSION=$(cat ${INPUT_VERSION_FILE:?} | tr -s ' ')
+        else # `version_file` was not provided
+            echo "ERROR: neither \`version\` nor \`version_file\` were provided."
+            exit 1
+        fi
+    fi
+}
+
+function get_unresolved_version_subsequent_jobs() {
+    # In subsequent jobs, the `version` input must be provided.
+    if [[ -z "${INPUT_VERSION?}" ]]; then
+        echo "ERROR: This is not the first job, so the \`version\` input must be provided."
+        exit 1
+    fi
+    # In subsequent jobs, the `version_input` must not be provided.
+    if [[ ! -z "${INPUT_VERSION_FILE?}" ]]; then
+        echo "ERROR: This is not the first job, so the \`version_file\` input must not be provided."
+        exit 1
+    fi
+    UNRESOLVED_VERSION="${INPUT_VERSION:?}"
+}
+
+function get_unresolved_version() {
+    if [[ "${INPUT_THIS_IS_FIRST_JOB?}" == "true" ]]; then
+        get_unresolved_version_first_job
+    else
+        get_unresolved_version_subsequent_jobs
+    fi
+}
+
+### End helper functions
+
+### Begin the main part of the script
+
+INPUT_EXTERNAL_REPO="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO:?}"
+INPUT_FOLDER="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER:?}"
+
+INPUT_THIS_IS_FIRST_JOB="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_THIS_IS_FIRST_JOB-}"
+INPUT_VERSION="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION-}"
+INPUT_VERSION_FILE="${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE-}"
+
+echo "--- Print the plugin inputs"
+get_unresolved_version
+echo "INFO: The Buildkite config version (unresolved) is: ${UNRESOLVED_VERSION:?}"
+echo "INFO: The Buildkite config files will be downloaded from the following repository: ${INPUT_EXTERNAL_REPO:?}"
+echo "INFO: The Buildkite config files will be downloaded into the following folder: ${INPUT_FOLDER:?}"
 
 echo "--- Print the commit in the primary repository"
 # Note: we allow this command to fail.
-git log -n 1 || echo "WARNING: could not successfully run the \"git log -n 1\" command"
+git log -n 1 || echo "WARNING: could not successfully run the \"git log -n 1\" command."
 
-echo "--- Print the Buildkite config version"
+echo "--- Clone from ${INPUT_EXTERNAL_REPO:?} into ${INPUT_FOLDER:?}"
 
-BK_VERSION_NLINES=$(wc -l ${BK_VERSION_FILE:?} | awk '{ print $1 }')
-BK_VERSION_NWORDS=$(wc -w ${BK_VERSION_FILE:?} | awk '{ print $1 }')
+echo "before git clone"
+git clone ${INPUT_EXTERNAL_REPO:?} ${INPUT_FOLDER:?}
+echo "after git clone"
 
-if [ "${BK_VERSION_NLINES:?}" != "1" ]; then
-  echo "ERROR: The ${BK_VERSION_FILE:?} file contains ${BK_VERSION_NLINES:?} lines."
-  echo "ERROR: It is only supposed to contain 1 line."
-  exit 1
-fi
-
-if [ "${BK_VERSION_NWORDS:?}" != "1" ]; then
-  echo "ERROR: The ${BK_VERSION_FILE:?} file contains ${BK_VERSION_NWORDS:?} words."
-  echo "ERROR: It is only supposed to contain 1 word."
-  exit 1
-fi
-
-BK_VERSION_VALUE=$(cat ${BK_VERSION_FILE:?} | tr -s ' ')
-
-echo "The Buildkite config version is: ${BK_VERSION_VALUE:?}"
-
-echo "--- Clone from ${BK_EXTERNAL_REPO:?}"
-
-rm -rf ${BK_FOLDER_NAME:?}
-git clone ${BK_EXTERNAL_REPO:?} ${BK_FOLDER_NAME:?}
-cd ${BK_FOLDER_NAME:?}
-
-echo "--- Check out ${BK_VERSION_VALUE:?}"
-git checkout ${BK_VERSION_VALUE:?}
+echo "--- Check out ${UNRESOLVED_VERSION:?}"
+PREVIOUS_WORKING_DIRECTORY=`pwd`
+cd ${INPUT_FOLDER:?}
+git checkout ${UNRESOLVED_VERSION:?}
 
 echo "--- Print the commit in the external repository"
 git log -n 1
+RESOLVED_VERSION=`git rev-parse HEAD | tr -s ' '`
+cd ${PREVIOUS_WORKING_DIRECTORY:?}
 
-cd ..
+echo "-- Print the plugin outputs"
+
+export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="${RESOLVED_VERSION:?}"
+export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO="${INPUT_EXTERNAL_REPO:?}"
+export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${INPUT_FOLDER:?}"
+
+echo "INFO: The Buildkite config version (unresolved) was: ${UNRESOLVED_VERSION:?}"
+echo "INFO: The Buildkite config version (resolved) is:    ${RESOLVED_VERSION:?}"
+
+### End the main part of the script

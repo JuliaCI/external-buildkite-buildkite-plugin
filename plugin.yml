@@ -4,10 +4,17 @@ author: https://github.com/JuliaCI
 requirements: [git]
 configuration:
   properties:
-    version_file:
-      type: string
     external_repo:
       type: string
     folder:
       type: string
+    this_is_first_job:
+      type: boolean
+    version:
+      type: string
+    version_file:
+      type: string
   additionalProperties: false
+  required:
+    - external_repo
+    - folder
