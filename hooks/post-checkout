@@ -82,8 +82,7 @@ echo "INFO: The Buildkite config files will be downloaded from the following rep
 echo "INFO: The Buildkite config files will be downloaded into the following folder: ${INPUT_FOLDER:?}"
 
 echo "--- Print the commit in the primary repository"
-# Note: we allow this command to fail.
-git log -n 1 || echo "WARNING: could not successfully run the \"git log -n 1\" command."
+git log -n 1
 
 echo "--- Clone from ${INPUT_EXTERNAL_REPO:?} into ${INPUT_FOLDER:?}"
 
