@@ -42,7 +42,7 @@ function test_post_checkout_hook() {
     assert_output --partial "Date:   Thu Nov 11 18:48:11 2021 -0500"
 }
 
-@test "Integration test: first job" {
+@test "Unit test: first job" {
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO="https://github.com/JuliaLang/julia.git"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_THIS_IS_FIRST_JOB="true"
@@ -54,7 +54,7 @@ function test_post_checkout_hook() {
     test_post_checkout_hook
 }
 
-@test "Integration test: subsequent job" {
+@test "Unit test: subsequent job" {
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO="https://github.com/JuliaLang/julia.git"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
