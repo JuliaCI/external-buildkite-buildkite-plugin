@@ -4,17 +4,21 @@ author: https://github.com/JuliaCI
 requirements: [git]
 configuration:
   properties:
-    external_repo:
+    # The external repository that we will clone.
+    # Example value: https://github.com/JuliaCI/julia-buildkite
+    repo_url:
       type: string
+
+    # Folder the external repository will be cloned into
+    # defaults to `.buildkite`
     folder:
       type: string
-    this_is_first_job:
-      type: boolean
+
+    # The version of the external repository that will be cloned
+    # This can be a gitsha, a gitref, or a path to a 
     version:
-      type: string
-    version_file:
       type: string
   additionalProperties: false
   required:
-    - external_repo
+    - repo_url
     - folder

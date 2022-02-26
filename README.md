@@ -9,33 +9,16 @@ Download Buildkite configuration files from an external repository.
 
 ## Example
 
-To use this plugin, add the following YAML snippets to your `pipeline.yml` file. Note that
-the appropriate snippet is different for the first job versus all subsequent jobs.
-
-### First job
-
-This snippet should only be used for the first job. All other jobs should use the snippet
-from the "Subsequent jobs" section.
+To use this plugin, add the following YAML snippets to your `pipeline.yml` file:
 
 ```yml
 steps:
   - plugins:
     - JuliaCI/external-buildkite#v1.0:
-        this_is_first_job: true
-        version_file: 'buildkite.version'
-        external_repo: 'https://github.com/JuliaCI/julia-buildkite.git'
+        version: './buildkite.version'
+        repo_url: 'https://github.com/JuliaCI/julia-buildkite.git'
         folder: '.buildkite'
 ```
 
-### Subsequent jobs
-
-This snippet should be used for all jobs except the first job.
-
-```yml
-steps:
-  - plugins:
-    - JuliaCI/external-buildkite#v1.0:
-        version: '${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION?}'
-        external_repo: '${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO?}'
-        folder: '${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER?}'
-```
+Note that `version` can be a gitsha, a gitref (e.g. `master`) or a file that contains within it a gitsha or gitref.
+If you opt to use a file for `version`, you must specify its path starting with `./` to disambiguate it from an arbitrary gitref.
