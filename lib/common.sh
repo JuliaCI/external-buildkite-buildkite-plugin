@@ -79,7 +79,7 @@ function get_meta_env_value() {
     fi
 
     # Check to see if it's defined in buildkite-agent metadata:
-    if which buildkite-agent >/dev/null 2>/dev/null && buildkite-agent metadata exists "${NAME}"; then
+    if buildkite-agent metadata exists "${NAME}"; then
         buildkite-agent metadata get "${NAME}"
         return
     fi
