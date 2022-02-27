@@ -19,6 +19,8 @@ INPUT_VERSION="$(get_meta_env_value VERSION)"
 
 
 # Clone external repo to the local path:
+rm -rf "${INPUT_FOLDER}"
+mkdir -p "$(dirname ${INPUT_FOLDER})"
 git clone "${INPUT_REPO_URL}" "${INPUT_FOLDER}"
 
 # Resolve the version, now that we have all the files locally:

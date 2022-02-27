@@ -95,3 +95,15 @@ function test_known_checkout() {
     assert [ $(buildkite-agent meta-data get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION) == "test-anchor" ]
     test_known_checkout
 }
+
+@test "pre-existing target folder" {
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER=".buildkite"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="./.buildkite/version"
+
+    # Create a `.buildkite` folder that already contains some stuff
+    mkdir -p "${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER}"
+    echo "test-anchor" > "${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION}"
+
+    test_known_checkout
+}
