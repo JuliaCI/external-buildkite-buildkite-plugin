@@ -80,7 +80,8 @@ function test_known_checkout() {
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="./version"
 
-    echo "test-anchor" > ./version
+    echo "# This is a comment and should be ignored" > ./version
+    echo "test-anchor" >> ./version
     test_known_checkout
 }
 
