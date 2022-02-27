@@ -14,7 +14,7 @@ function unset_plugin_variables() {
     unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION
 
     # Clear any metadata that was set previously
-    buildkite-agent metadata clear-all
+    buildkite-agent meta-data clear-all
 }
 
 function setup() {
@@ -45,7 +45,7 @@ function test_known_checkout() {
     assert_file_exist "${TEMPORARY_DIRECTORY:?}/.buildkite/README.md"
     assert_file_exist "${TEMPORARY_DIRECTORY:?}/.buildkite/tests/post-checkout.bats"
 
-    assert [[ "$(buildkite-agent metadata get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION)" == "${KNOWN_HASH}" ]]
+    assert [[ "$(buildkite-agent meta-data get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION)" == "${KNOWN_HASH}" ]]
 }
 
 @test "Embedded gitsha" {
@@ -84,14 +84,14 @@ function test_known_checkout() {
     test_known_checkout
 }
 
-@test "buildkite-agent metadata override" {
+@test "buildkite-agent meta-data override" {
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="not a real version"
 
     # Set ourselves an overriding meta version
-    buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION "test-anchor"
+    buildkite-agent meta-data set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION "test-anchor"
 
-    assert [ $(buildkite-agent metadata get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION) == "test-anchor" ]
+    assert [ $(buildkite-agent meta-data get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION) == "test-anchor" ]
     test_known_checkout
 }
