@@ -21,4 +21,4 @@ steps:
 ```
 
 Note that `version` can be a gitsha, a gitref (e.g. `master`), or the path to a file that contains within it a gitsha or gitref.
-If you opt to use a file for `version`, you must specify its path starting with `./` to disambiguate it from an arbitrary gitref.
+If you opt to use a file for `version`, you must specify its path starting with `./` or `/` to disambiguate it from an arbitrary gitref.

@@ -37,13 +37,15 @@ function resolve_version() {
         return 0
     fi
 
-    # Are we a file?  We only accept files that start with `./`, to disambiguate
+    # Are we a file?  We only accept files that start with `./` or `/`, to disambiguate
     # files from valid git tags that look like files.  We also check to make sure
     # that reading the file results in only a single word (a gitsha or gitref)
-    if [[ "${VERSION}" == "./"* ]]; then
-        local VERSION_CONTENTS="$(cat "${VERSION}" 2>/dev/null)"
-        if [[ "$(wc -w <<< "${VERSION_CONTENTS}" | xargs)" -ne "1" ]]; then
-            die "The ${VERSION} file must contain exactly 1 word!"
+    if [[ "${VERSION}" == "./"* ]] || [[ "${VERSION}" == "/"* ]]; then
+        # Strip out empty lines and comments
+        local VERSION_CONTENTS="$(cat "${VERSION}" 2>/dev/null | grep -o '^[^#]*')"
+        NUM_VERSION_WORDS="$(wc -w <<< "${VERSION_CONTENTS}" | xargs)"
+        if [[ "${NUM_VERSION_WORDS}" -ne "1" ]]; then
+            die "The ${VERSION} file must contain exactly 1 word, but we counted '${NUM_VERSION_WORDS}'!"
         fi
 
         # If the version_CONTENTS file contains a gitsha, excellent, we're done
