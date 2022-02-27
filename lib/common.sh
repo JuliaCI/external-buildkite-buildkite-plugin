@@ -66,7 +66,7 @@ function resolve_version() {
     die "Invalid version specification '${VERSION}'"
 }
 
-# Helper function to first query `buildkite-agent metadata` to see if a value
+# Helper function to first query `buildkite-agent meta-data` to see if a value
 # has been set, if it has not, the environment, and finally if it was not found
 # if we are given a default value, return that.  Otherwise error out with a
 # descriptive error message.  If the name does not start with `BUILDKITE_`,
@@ -78,9 +78,9 @@ function get_meta_env_value() {
         NAME="BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_${NAME}"
     fi
 
-    # Check to see if it's defined in buildkite-agent metadata:
-    if buildkite-agent metadata exists "${NAME}"; then
-        buildkite-agent metadata get "${NAME}"
+    # Check to see if it's defined in buildkite-agent meta-data:
+    if buildkite-agent meta-data exists "${NAME}"; then
+        buildkite-agent meta-data get "${NAME}"
         return
     fi
 
