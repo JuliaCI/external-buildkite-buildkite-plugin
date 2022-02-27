@@ -2,13 +2,19 @@
 
 # load '/usr/local/lib/bats/load.bash'
 load "${BATS_PATH:?}/load.bash"
+source "/plugin/lib/common.sh"
+
+# Create fake "buildkite-agent"
+cp /plugin/tests/fake-buildkite-agent.sh /usr/local/bin/buildkite-agent
+chmod +x /usr/local/bin/buildkite-agent
 
 function unset_plugin_variables() {
-    unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO
+    unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL
     unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER
-    unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_THIS_IS_FIRST_JOB
     unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION
-    unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE
+
+    # Clear any metadata that was set previously
+    buildkite-agent metadata clear-all
 }
 
 function setup() {
@@ -16,6 +22,7 @@ function setup() {
 
     unset TEMPORARY_DIRECTORY
     TEMPORARY_DIRECTORY=$(mktemp -d)
+    pushd "${TEMPORARY_DIRECTORY}" >/dev/null
 }
 
 function teardown() {
@@ -23,41 +30,68 @@ function teardown() {
 
     rm -rf ${TEMPORARY_DIRECTORY:?}
     unset TEMPORARY_DIRECTORY
+    popd >/dev/null
 }
 
-function test_post_checkout_hook() {
-    run "${PWD:?}/hooks/post-checkout"
-
+function test_known_checkout() {
+    KNOWN_HASH="27b8700184aa282a89e380449eb0b2a11b2c7d85"
+    run "/plugin/hooks/post-checkout"
     assert_success
 
-    # Uncomment the following line to print the output from the hook (useful for debugging):
-    # assert_failure
+    assert_output --partial "Note: checking out '${KNOWN_HASH}'"
+    assert_output --partial "Cloning into '${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER:?}'..."
 
-    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER}/README.md
-    assert_file_exist ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER}/stdlib/Pkg.version
+    # Ensure that we actually got some of these files
+    assert_file_exist "${TEMPORARY_DIRECTORY:?}/.buildkite/README.md"
+    assert_file_exist "${TEMPORARY_DIRECTORY:?}/.buildkite/tests/post-checkout.bats"
 
-    assert_output --partial "INFO: The Buildkite config version (unresolved) is: d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
-    assert_output --partial "commit d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
-    assert_output --partial "Author: Viral B. Shah <ViralBShah@users.noreply.github.com>"
-    assert_output --partial "Date:   Thu Nov 11 18:48:11 2021 -0500"
+    assert [[ "$(buildkite-agent metadata get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION)" == "${KNOWN_HASH}" ]]
 }
 
-@test "Unit test: first job" {
-    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO="https://github.com/JuliaLang/julia.git"
+@test "Embedded gitsha" {
+    # Ouroboros mode engage
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
-    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_THIS_IS_FIRST_JOB="true"
-    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE="${TEMPORARY_DIRECTORY:?}/buildkite.version"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="27b8700184aa282a89e380449eb0b2a11b2c7d85"
 
-    run rm -rf "${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}"
-    run bash -c "echo d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8 > ${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION_FILE:?}"
-
-    test_post_checkout_hook
+    test_known_checkout
 }
 
-@test "Unit test: subsequent job" {
-    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_EXTERNAL_REPO="https://github.com/JuliaLang/julia.git"
+@test "Embedded gitref" {
+    # Ouroboros mode engage
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
-    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="d08b05df6f01cf4ec6e4c28ad94cedda76cc62e8"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="test-anchor"
 
-    test_post_checkout_hook
+    test_known_checkout
+}
+
+@test "File gitsha" {
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="./version"
+
+    echo "27b8700184aa282a89e380449eb0b2a11b2c7d85" > ./version
+    test_known_checkout
+}
+
+@test "File gitref" {
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="./version"
+
+    echo "test-anchor" > ./version
+    test_known_checkout
+}
+
+@test "buildkite-agent metadata override" {
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
+    export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="not a real version"
+
+    # Set ourselves an overriding meta version
+    buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION "test-anchor"
+
+    assert [ $(buildkite-agent metadata get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION) == "test-anchor" ]
+    test_known_checkout
 }
