@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Load common tools
-EXTERNAL_BUILDKITE_REPO="$( cd "$( dirname "$( dirname "${BASH_SOURCE[0]}" )" )" &> /dev/null && pwd )"
-source "${EXTERNAL_BUILDKITE_REPO}/lib/common.sh"
+PLUGIN_ROOT="$( cd "$( dirname "$( dirname "${BASH_SOURCE[0]}" )" )" &> /dev/null && pwd )"
+source "${PLUGIN_ROOT}/lib/common.sh"
 
 
 
@@ -32,9 +32,7 @@ export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="${RESOLVED_VERSION}"
 export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="${INPUT_REPO_URL}"
 export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${INPUT_FOLDER}"
 
-# Also set them via metadata, if we have it available
-if which buildkite-agent >/dev/null 2>/dev/null; then
-    buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION "${RESOLVED_VERSION}"
-    buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL "${INPUT_REPO_URL}"
-    buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER "${INPUT_FOLDER}"
-fi
+# Also set them via metadata
+buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION "${RESOLVED_VERSION}"
+buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL "${INPUT_REPO_URL}"
+buildkite-agent metadata set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER "${INPUT_FOLDER}"

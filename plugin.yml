@@ -15,7 +15,8 @@ configuration:
       type: string
 
     # The version of the external repository that will be cloned
-    # This can be a gitsha, a gitref, or a path to a 
+    # This can be a gitsha, a gitref, or a path to a file that contains
+    # within it a gitsha or gitref.
     version:
       type: string
   additionalProperties: false

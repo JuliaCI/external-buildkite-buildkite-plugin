@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script used by the tests to mock out the `buildkite-agent metadata` utility,
+# storing metadata blobs on the filesystem.  It is installed as `buildkite-agent` and
+# used to test functionality that depends on a functioning metadata store.
 mkdir -p /tmp/metadata_store
 
 function handle_metadata() {
@@ -11,11 +14,14 @@ function handle_metadata() {
         set)
             echo "${3}" > "/tmp/metadata_store/${2}"
             ;;
+        get)
+            cat "/tmp/metadata_store/${2}"
+            ;;
         unset)
             rm -f "/tmp/metadata_store/${2}"
             ;;
-        get)
-            cat "/tmp/metadata_store/${2}"
+        clear-all)
+            rm -rf "/tmp/metadata_store"
             ;;
         *)
             echo "Unrecognized metadata command $1" >&2

@@ -13,9 +13,8 @@ function unset_plugin_variables() {
     unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER
     unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION
 
-    buildkite-agent metadata unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL
-    buildkite-agent metadata unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER
-    buildkite-agent metadata unset BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION
+    # Clear any metadata that was set previously
+    buildkite-agent metadata clear-all
 }
 
 function setup() {

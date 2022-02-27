@@ -39,7 +39,7 @@ function resolve_version() {
 
     # Are we a file?  We only accept files that start with `./`, to disambiguate
     # files from valid git tags that look like files.  We also check to make sure
-    # that reading the file results in only a single word (a branch name)
+    # that reading the file results in only a single word (a gitsha or gitref)
     if [[ "${VERSION}" == "./"* ]]; then
         local VERSION_CONTENTS="$(cat "${VERSION}" 2>/dev/null)"
         if [[ "$(wc -w <<< "${VERSION_CONTENTS}" | xargs)" -ne "1" ]]; then
