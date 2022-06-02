@@ -75,13 +75,13 @@ function test_known_checkout() {
     test_known_checkout
 }
 
-@test "File gitref" {
+@test "File branch" {
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_REPO_URL="https://github.com/JuliaCI/external-buildkite-buildkite-plugin"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER="${TEMPORARY_DIRECTORY:?}/.buildkite"
     export BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION="./version"
 
     echo "# This is a comment and should be ignored" > ./version
-    echo "test-anchor" >> ./version
+    echo "test-branch" >> ./version
     test_known_checkout
 }
 
