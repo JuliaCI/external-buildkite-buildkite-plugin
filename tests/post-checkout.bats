@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 # load '/usr/local/lib/bats/load.bash'
-load "${BATS_PATH:?}/load.bash"
+load "${BATS_PLUGIN_PATH:?}/load.bash"
 source "/plugin/lib/common.sh"
 
 # Create fake "buildkite-agent"
@@ -38,7 +38,7 @@ function test_known_checkout() {
     run "/plugin/hooks/post-checkout"
     assert_success
 
-    assert_output --partial "Note: checking out '${KNOWN_HASH}'"
+    assert_output --partial "Note: switching to '${KNOWN_HASH}'"
     assert_output --partial "Cloning into '${BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_FOLDER:?}'..."
 
     # Ensure that we actually got some of these files
