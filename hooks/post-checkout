@@ -20,7 +20,7 @@ INPUT_VERSION="$(get_meta_env_value VERSION)"
 
 # Clone external repo to the local path
 git clone "${INPUT_REPO_URL}" "${INPUT_FOLDER}"
-git -C "${INPUT_FOLDER}" fetch origin 'refs/*:refs/origin/*'
+git -C "${INPUT_FOLDER}" fetch -u origin 'refs/*:refs/*'
 
 # Resolve the version, now that we have all the files locally:
 RESOLVED_VERSION="$(resolve_version "${INPUT_VERSION}" "${INPUT_FOLDER}")"
