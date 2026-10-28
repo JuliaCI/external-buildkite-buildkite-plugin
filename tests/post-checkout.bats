@@ -15,6 +15,7 @@ function unset_plugin_variables() {
 
     # Clear any metadata that was set previously
     buildkite-agent meta-data clear-all
+    rm -f /tmp/fake_agent_failures
 }
 
 function setup() {
@@ -95,4 +96,22 @@ function test_known_checkout() {
 
     assert [ $(buildkite-agent meta-data get BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION) == "test-anchor" ]
     test_known_checkout
+}
+
+@test "buildkite-agent meta-data retries" {
+    buildkite-agent meta-data set BUILDKITE_PLUGIN_EXTERNAL_BUILDKITE_VERSION "test-anchor"
+
+    echo 2 > /tmp/fake_agent_failures
+    run get_meta_env_value VERSION
+    assert_success
+    assert_output --partial "test-anchor"
+
+    # A key that is not set is not retried
+    run get_meta_env_value FOLDER .buildkite
+    assert_success
+    assert_output ".buildkite"
+
+    echo 10 > /tmp/fake_agent_failures
+    run get_meta_env_value VERSION
+    assert_failure
 }
