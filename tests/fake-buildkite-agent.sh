@@ -9,7 +9,7 @@ function handle_metadata() {
     case "$1" in
         exists)
             [ -f "/tmp/metadata_store/${2}" ] && exit 0
-            exit 1
+            exit 100
             ;;
         set)
             echo "${3}" > "/tmp/metadata_store/${2}"
@@ -29,6 +29,17 @@ function handle_metadata() {
             ;;
     esac
 }
+
+# Fail the next N calls when /tmp/fake_agent_failures holds N, as a dropped
+# connection to the Buildkite API would
+if [ -s /tmp/fake_agent_failures ]; then
+    remaining="$(cat /tmp/fake_agent_failures)"
+    if [ "${remaining}" -gt 0 ]; then
+        echo $((remaining - 1)) > /tmp/fake_agent_failures
+        echo "buildkite-agent: fatal: failed to get meta-data: connection reset by peer" >&2
+        exit 1
+    fi
+fi
 
 case "$1" in
     meta-data)

@@ -68,6 +68,25 @@ function resolve_version() {
     die "Invalid version specification '${VERSION}'"
 }
 
+# Run `buildkite-agent meta-data` with the given arguments, retrying a few times,
+# since a dropped connection to the Buildkite API would otherwise fail the job.
+# `exists` exits with 100 when the key is not set; that is an answer, not an error.
+function meta_data() {
+    local attempt status
+    for attempt in 1 2 3 4; do
+        status=0
+        buildkite-agent meta-data "$@" || status=$?
+        if [[ "${status}" -eq 0 ]] || [[ "${1}" == "exists" && "${status}" -eq 100 ]]; then
+            return "${status}"
+        fi
+        if [[ "${attempt}" -lt 4 ]]; then
+            echo "buildkite-agent meta-data ${1} failed with status ${status}, retrying" >&2
+            sleep $((attempt * 5))
+        fi
+    done
+    die "buildkite-agent meta-data ${1} ${2:-} kept failing"
+}
+
 # Helper function to first query `buildkite-agent meta-data` to see if a value
 # has been set, if it has not, the environment, and finally if it was not found
 # if we are given a default value, return that.  Otherwise error out with a
@@ -81,8 +100,8 @@ function get_meta_env_value() {
     fi
 
     # Check to see if it's defined in buildkite-agent meta-data:
-    if buildkite-agent meta-data exists "${NAME}"; then
-        buildkite-agent meta-data get "${NAME}"
+    if meta_data exists "${NAME}"; then
+        meta_data get "${NAME}"
         return
     fi
 
